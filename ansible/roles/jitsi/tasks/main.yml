@@ -1,0 +1,52 @@
+---
+- name: get public IP
+  ipify_facts:
+
+- name: install jitsi packages
+  with_items: "{{ jitsi_packages }}"
+  package:
+    name: "{{ item.name }}"
+  notify:
+    - restart jitsi-videobridge
+
+- name: configure jitsi videobridge
+  template:
+    src: jitsi-videobridge.conf.j2
+    dest: /usr/local/etc/jitsi/videobridge/jitsi-videobridge.conf
+  notify:
+    - restart jitsi-videobridge
+
+- name: configure sip
+  template:
+    src: sip-communicator.properties.j2
+    dest: /usr/local/etc/jitsi/videobridge/sip-communicator.properties
+  notify:
+    - restart jitsi-videobridge
+
+- name: configure jitsi-meet
+  template:
+    src: config.js.j2
+    dest: /usr/local/www/jitsi-meet/config.js
+  notify:
+    - restart jitsi-videobridge
+
+- name: configure jicofo
+  template:
+    src: jicofo.conf.j2
+    dest: /usr/local/etc/jitsi/jicofo/jicofo.conf
+  notify:
+    - restart jicofo
+
+- name: enable jitsi_videobridge service
+  template:
+    src: jitsi_videobridge.j2
+    dest: /etc/rc.conf.d/jitsi_videobridge
+  notify:
+    - restart jitsi-videobridge
+
+- name: enable jicofo
+  template:
+    src: jicofo.j2
+    dest: /etc/rc.conf.d/jicofo
+  notify:
+    - restart jicofo
